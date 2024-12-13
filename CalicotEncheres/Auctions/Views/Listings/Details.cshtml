@@ -1,0 +1,124 @@
+﻿@model Auctions.Models.Listing
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> userManager
+@inject IConfiguration Configuration
+
+@{
+    ViewData["Title"] = "Détail";
+}
+
+@if(User!.Identity!.IsAuthenticated)
+{
+    @if(Model.IsSold ==true)
+    {
+        @foreach(var bid in Model?.Bids!)
+        {
+            @if(bid.Price == Model?.Price)
+            {
+                @if(bid.IdentityUserId == userManager.GetUserId(User))
+                {
+                    <h5>Félicitations, vous êtes le gagnant !</h5>
+                }
+                else if (userManager.GetUserId(User) == Model?.User?.Id)
+                {
+                    <h5>Le gagnant est: @bid?.User?.UserName !</h5>
+                }
+                else
+                {
+                    <h5>Les enchères sont fermées !</h5>
+                }
+            }
+        }
+    }
+}
+
+<h4 style="text-align:center">@Model?.Title</h4>
+<div class="container" style="background-color: rgba(138, 129, 133, 0.6); margin-top: 50px; margin-bottom: 50px; padding: 20px; border-radius:10px;">
+    <div class="row">
+        <div class="col col-xs-6 col-lg-5">
+            @* <img src="~/Images/@Model?.ImagePath" style="width: 100%; max-height: 60vh;" /> *@
+            <img src="@Configuration["ImageUrl"]@Model?.ImagePath" style="width: 100%; max-height: 60vh;" />
+        </div>
+        <div class="col col-xs-6 col-lg-7">           
+            <div>@Model?.Description</div>
+            @if(User.Identity.IsAuthenticated)
+            {
+                <form asp-action="AddBid" method="post">
+                    <div>
+                        Enchère: $ <input type="number" min="0" step="1" name="Price" placeholder="@Model?.Price.ToString("N2")"/>
+                        <input type="hidden" name="IdentityUserId" class="form-control" value="@userManager.GetUserId(User)"/>
+                        <input type="hidden" name="ListingId" class="form-control" value="@Model?.Id" />
+                        <input type="submit" class="btn btn-primary">
+                    </div>
+                </form>
+                <p>Enchère soumise : @Model?.Bids?.Count</p>
+                <br>
+                @if(userManager.GetUserId(User) == Model?.User?.Id)
+                {
+                    @foreach(var bid in Model?.Bids!)
+                    {
+                        <ul style="list-style-type: none;">
+                            @bid?.User?.UserName a enchéri $@bid?.Price.ToString("N2").
+                        </ul>
+                    }
+                }
+            }
+            else
+            {
+                <div>
+                    Enchère: $ <input type="number" min="0" step="1" name="Price" placeholder="@Model?.Price.ToString("N2")" />
+                    <input disabled type="submit" class="btn btn-primary">
+                </div>
+                <p>Nombre d'enchères soumises : @Model?.Bids?.Count</p>
+            }
+
+            <div>Publié par : @Model?.User?.UserName</div>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                @if (userManager.GetUserId(User) == Model?.User?.Id)
+                {
+                    @if(Model?.IsSold == false)
+                    {
+                        <a asp-action="CloseBidding" asp-route-id="@Model.Id">Fermer les enchères</a>
+                    }
+                    
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<br>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="container">
+        <form asp-action="AddComment" method="post">
+            <h6>Ajouter un commentaire</h6>
+            <textarea class="form-control" aria-label="With textarea" name="Content" style="width: 40%; vertical-align:top;"></textarea>
+            <input type="hidden" name="IdentityUserId" class="form-control" value="@userManager.GetUserId(User)" />
+            <input type="hidden" name="ListingId" class="form-control" value="@Model?.Id" />
+            <input type="submit" class="btn btn-primary" style="display: inline-block; margin-top:10px;">
+        </form>
+    </div>
+}
+else
+{
+    <div class="container">       
+            <h6>Ajouter un commentaire</h6>
+            <textarea class="form-control" aria-label="With textarea" name="Content" style="width: 40%; vertical-align:top;"></textarea>          
+            <input type="submit" disabled class="btn btn-primary" style="display: inline-block; margin-top:10px;">       
+    </div>   
+}
+<br>
+<div class="container">
+    <h6>Commentaires</h6>
+    @foreach(var comment in Model?.Comments!)
+    {
+        <div style="border:1px solid lightgray; margin: 10px; padding: 10px; border-radius: 10px; width: 40%;">
+            <p>@comment.Content - @comment?.User?.UserName</p>
+        </div>
+    }
+</div>
+
