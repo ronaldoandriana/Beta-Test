@@ -20,18 +20,18 @@ jobs:
 
     - name: Install dependencies
       run: |
-      cd ../../CalicotEncheres
-      dotnet restore
+        cd ../../CalicotEncheres
+        dotnet restore
 
     - name: Build application
       run: |
-      cd ../../CalicotEncheres
-      dotnet build --configuration Release
+        cd ../../CalicotEncheres
+        dotnet build --configuration Release
 
     - name: Publish application
       run: |
-      cd ../../CalicotEncheres
-      dotnet publish --configuration Release --output ./publish
+        cd ../../CalicotEncheres
+        dotnet publish --configuration Release --output ./publish
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
