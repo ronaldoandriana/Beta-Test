@@ -18,20 +18,11 @@ jobs:
       with:
         dotnet-version: '8.x'
 
-    - name: Install dependencies
-      run: |
-        cd ../../CalicotEncheres
-        dotnet restore
-
     - name: Build application
-      run: |
-        cd ../../CalicotEncheres
-        dotnet build --configuration Release
+      run: dotnet build ./CalicotEncheres/Auctions.sln --configuration Release
 
     - name: Publish application
-      run: |
-        cd ../../CalicotEncheres
-        dotnet publish --configuration Release --output ./publish
+      run: dotnet publish ./CalicotEncheres/Auctions/Auctions.csproj -c Release -o ./publish
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
